@@ -1,6 +1,6 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import { ChevronDown, RefreshCw } from 'lucide-react';
+import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { ChevronDown, RefreshCw, Pencil } from 'lucide-react';
 
 const COUNTRIES = [
     { id: 'ind', name: 'India', flag: '🇮🇳', medianIncome: 2000, color: 'from-orange-400 to-green-500' },
@@ -8,25 +8,45 @@ const COUNTRIES = [
     { id: 'nga', name: 'Nigeria', flag: '🇳🇬', medianIncome: 1200, color: 'from-green-500 to-white' },
 ];
 
+function AnimatedNumber({ value }) {
+    const spring = useSpring(value, { mass: 0.8, stiffness: 75, damping: 15 });
+    const display = useTransform(spring, (current) => Math.floor(current).toLocaleString());
+
+    useEffect(() => {
+        spring.set(value);
+    }, [value, spring]);
+
+    return <motion.span>{display}</motion.span>;
+}
+
 export default function MultiplierMatchup() {
-    const [targetCountry, setTargetCountry] = useState(COUNTRIES[1]); // Default Burundi
+    const [targetCountry, setTargetCountry] = useState(COUNTRIES[1]);
+
+    // UX State
     const [userIncome, setUserIncome] = useState(50000);
+    const [isEditingIncome, setIsEditingIncome] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    // Defaults
+    const userCountryMedian = 65000; // Mocked Switz Median
+
+    // Reset to median logic if user hasn't edited
+    // For simplicity in prototype, we'll keep the direct input but add the "Median" label
 
     // Calculate stats
     const multiplier = userIncome / targetCountry.medianIncome;
     const yearsToEarn = Math.floor(multiplier);
 
-    // Calculate relative widths for the bar graph
-    // User is always 100% width relative to themselves, but to show scale against Country:
-    // If User = 100%, Country = 100 / multiplier
-    const countryBarWidth = Math.max(0.5, (1 / multiplier) * 100); // Min 0.5% visibility
+    const countryBarWidth = Math.max(0.5, (1 / multiplier) * 100);
 
     return (
         <div id="matchup-section" className="min-h-screen w-full flex flex-col items-center justify-center bg-[#FAFAFA] font-sans relative">
 
-            {/* Background Ambience (Subtler) */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[var(--color-accent)] opacity-[0.03] blur-[150px] rounded-full pointer-events-none" />
+            {/* 1. TEXTURE: Subtle Grain to fix emptiness */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-0" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
+
+            {/* 2. GRADIENT: Subtler Ambient Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[var(--color-accent)] opacity-[0.04] blur-[150px] rounded-full pointer-events-none" />
 
             {/* Header / Nav Anchor */}
             <div className="absolute top-10 left-0 w-full flex justify-center opacity-30 pointer-events-none">
@@ -40,21 +60,42 @@ export default function MultiplierMatchup() {
                 className="w-full max-w-5xl px-6 relative z-10 flex flex-col gap-12"
             >
 
-                {/* Top Control Bar: User Input & Country Selector */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-8 border-b border-zinc-100 pb-12">
+                {/* Top Control Bar */}
+                <div className="flex flex-col md:flex-row justify-between items-center gap-8 border-b border-zinc-100 pb-12 z-20">
 
-                    {/* Input Side */}
-                    <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                    {/* Input Side (Revised UX) */}
+                    <div className="flex flex-col items-center md:items-start text-center md:text-left relative group">
                         <label className="text-xs font-bold uppercase tracking-widest text-[#121212]/40 mb-2">My Annual Income</label>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-light text-zinc-400">$</span>
-                            <input
-                                type="number"
-                                value={userIncome}
-                                onChange={(e) => setUserIncome(Number(e.target.value))}
-                                className="text-4xl md:text-5xl font-bold bg-transparent border-b border-transparent hover:border-zinc-200 focus:border-[var(--color-accent)] outline-none w-48 transition-all text-[#121212] p-0"
-                            />
-                        </div>
+
+                        {isEditingIncome ? (
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-light text-zinc-400">$</span>
+                                <input
+                                    autoFocus
+                                    type="number"
+                                    value={userIncome}
+                                    onBlur={() => setIsEditingIncome(false)}
+                                    onChange={(e) => setUserIncome(Number(e.target.value))}
+                                    className="text-4xl md:text-5xl font-bold bg-transparent border-b-2 border-[var(--color-accent)] outline-none w-48 transition-all text-[#121212] p-0"
+                                />
+                            </div>
+                        ) : (
+                            <div
+                                onClick={() => setIsEditingIncome(true)}
+                                className="flex items-baseline gap-2 cursor-pointer hover:opacity-70 transition-opacity"
+                            >
+                                <span className="text-4xl md:text-5xl font-bold text-[#121212] flex gap-1">
+                                    $<AnimatedNumber value={userIncome} />
+                                </span>
+                                <Pencil size={18} className="text-zinc-300 group-hover:text-[var(--color-accent)] transition-colors" />
+                            </div>
+                        )}
+
+                        {!isEditingIncome && (
+                            <p className="text-xs text-zinc-400 mt-2">
+                                {userIncome === userCountryMedian ? "Using Country Median" : "Custom Amount"}
+                            </p>
+                        )}
                     </div>
 
                     {/* Selector Side */}
@@ -107,10 +148,15 @@ export default function MultiplierMatchup() {
                 {/* The Hero Card Area */}
                 <div className="bg-white rounded-3xl shadow-xl border border-zinc-100 p-8 md:p-12 relative overflow-hidden">
 
-                    {/* Watermark X Behavior */}
-                    <div className="absolute -right-10 -bottom-20 text-[300px] leading-none font-black text-[var(--color-accent)] opacity-[0.07] select-none pointer-events-none">
+                    {/* Watermark X */}
+                    <motion.div
+                        key={targetCountry.id}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 0.07, scale: 1 }}
+                        className="absolute -right-10 -bottom-20 text-[300px] leading-none font-black text-[var(--color-accent)] select-none pointer-events-none"
+                    >
                         x
-                    </div>
+                    </motion.div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative z-10">
 
@@ -122,7 +168,7 @@ export default function MultiplierMatchup() {
 
                             <div className="flex items-baseline gap-4">
                                 <span className="text-6xl md:text-8xl font-black text-[#121212] tracking-tighter">
-                                    {yearsToEarn}
+                                    <AnimatedNumber value={yearsToEarn} />
                                 </span>
                                 <span className="text-xl md:text-2xl font-bold uppercase tracking-widest text-[var(--color-accent)]">Years</span>
                             </div>
@@ -141,7 +187,9 @@ export default function MultiplierMatchup() {
                                     <span>You</span>
                                     <span>1 Year</span>
                                 </div>
-                                <div className="h-4 w-full bg-[var(--color-accent)] rounded-full shadow-[0_0_15px_oklch(51.4%_0.222_16.935_/_0.3)]"></div>
+                                <div className="h-4 w-full bg-[var(--color-accent)] rounded-full shadow-[0_0_15px_oklch(51.4%_0.222_16.935_/_0.3)] relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]"></div>
+                                </div>
                             </div>
 
                             {/* Country Bar */}
