@@ -1,13 +1,16 @@
 import GlobalContext from './components/GlobalContext';
+import ContextExplainer from './components/ContextExplainer';
 import MultiplierMatchup from './components/MultiplierMatchup';
 import DonationFlow from './components/DonationFlow';
 
 function App() {
   return (
-    <div className="bg-[#FAFAFA] text-[#121212] min-h-screen">
+    <div className="min-h-screen bg-zinc-50 text-zinc-900 font-sans selection:bg-rose-200 selection:text-rose-900">
       <GlobalContext />
-      <MultiplierMatchup />
-      <DonationFlow />
+      <ContextExplainer />
+      <div id="matchup-section">
+        <MultiplierMatchup />
+      </div>
     </div>
   );
 }
