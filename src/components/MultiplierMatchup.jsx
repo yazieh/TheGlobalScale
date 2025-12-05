@@ -54,7 +54,15 @@ export default function MultiplierMatchup() {
             // Convert real ms to simulated days
             // deltaTime (ms) / 1000 = seconds. * speed = days.
             const daysPassed = (deltaTime / 1000) * SIMULATION_SPEED;
-            setElapsed(prev => prev + daysPassed);
+
+            setElapsed(prev => {
+                const nextVal = prev + daysPassed;
+                if (nextVal >= DAYS_IN_YEAR) {
+                    setIsPlaying(false);
+                    return DAYS_IN_YEAR;
+                }
+                return nextVal;
+            });
         }
         previousTimeRef.current = time;
         if (isPlaying) {
