@@ -74,12 +74,12 @@ export default function GlobalContext() {
 
                         {/* Income Landmarks (Vertical Dashed Lines) */}
                         {/* $2.15/day - Approx 10th percentile */}
-                        <line x1={graphWidth * 0.1} y1={0} x2={graphWidth * 0.1} y2={graphHeight} stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2" opacity="0.4" />
-                        <text x={graphWidth * 0.1 + 5} y={graphHeight - 5} className="text-[9px] fill-zinc-400 font-mono uppercase tracking-wider">Extreme Poverty</text>
+                        <line x1={graphWidth * 0.1} y1={25} x2={graphWidth * 0.1} y2={graphHeight} stroke="#ef4444" strokeWidth="1" strokeDasharray="4 4" opacity="0.3" />
+                        <text x={graphWidth * 0.1 + 5} y={15} className="text-[10px] fill-zinc-400 font-bold font-sans uppercase tracking-wider">Extreme Poverty</text>
 
                         {/* Global Median - 50th percentile */}
-                        <line x1={graphWidth * 0.5} y1={0} x2={graphWidth * 0.5} y2={graphHeight} stroke="#121212" strokeWidth="1" strokeDasharray="2 2" opacity="0.2" />
-                        <text x={graphWidth * 0.5 + 5} y={graphHeight - 5} className="text-[9px] fill-zinc-400 font-mono uppercase tracking-wider">Global Middle</text>
+                        <line x1={graphWidth * 0.5} y1={25} x2={graphWidth * 0.5} y2={graphHeight} stroke="#121212" strokeWidth="1" strokeDasharray="4 4" opacity="0.2" />
+                        <text x={graphWidth * 0.5 + 5} y={15} className="text-[10px] fill-zinc-400 font-bold font-sans uppercase tracking-wider">Global Middle</text>
 
                         {/* The Curve Area */}
                         <motion.path
@@ -153,13 +153,14 @@ export default function GlobalContext() {
 
                     {/* Annotation for User */}
                     <motion.div
-                        className="absolute transform -translate-x-1/2 bg-white border border-zinc-200 shadow-lg rounded-lg px-4 py-2 text-sm z-10"
+                        className="absolute transform -translate-x-1/2 bg-white border border-zinc-200 shadow-lg rounded-xl px-5 py-3 text-sm z-10 flex flex-col items-center gap-1"
                         style={{ left: `${userPercentile}%`, top: '15%' }}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 2.6 }}
                     >
-                        <span className="font-bold text-[var(--color-accent)]">You</span>
+                        <span className="font-black text-rose-500 uppercase tracking-wider text-xs">You are here</span>
+                        <span className="font-medium text-zinc-600">Top 6% Globally</span>
                     </motion.div>
                 </div>
             </motion.div>
@@ -169,15 +170,17 @@ export default function GlobalContext() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 3 }}
-                className="flex gap-4"
+                className="flex flex-col items-center gap-6"
             >
                 <button
                     onClick={() => document.getElementById('matchup-section')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="bg-[var(--color-accent)] text-white px-8 py-3 rounded-full font-medium shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                    className="group relative bg-[#121212] text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-3 overflow-hidden"
                 >
-                    See My True Impact
+                    <span className="relative z-10">See My True Impact</span>
+                    <div className="absolute inset-0 bg-[var(--color-accent)] transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
                 </button>
-                <button className="bg-white text-zinc-600 border border-zinc-200 px-8 py-3 rounded-full font-medium hover:bg-zinc-50 transition-all">
+
+                <button className="text-zinc-400 text-sm hover:text-rose-500 transition-colors border-b border-transparent hover:border-rose-300 pb-0.5">
                     How is this calculated?
                 </button>
             </motion.div>
