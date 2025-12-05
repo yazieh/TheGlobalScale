@@ -1,190 +1,113 @@
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, useSpring, useTransform } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { ArrowRight, Check, Heart, ShieldCheck, Scale, AlertCircle } from 'lucide-react';
+import { ArrowRight, Heart, Droplets, Utensils, ShieldCheck, Pill } from 'lucide-react';
 
-const CHARITIES = [
-    {
-        id: 'givedirectly',
-        name: 'GiveDirectly',
-        desc: 'Sends cash directly to people in poverty. Efficiency: 93%.',
-        color: 'bg-emerald-500',
-        tags: ['Cash', 'Efficiency']
-    },
-    {
-        id: 'amf',
-        name: 'Against Malaria',
-        desc: 'Provides mosquito nets. $2 per net. Proven to save lives.',
-        color: 'bg-rose-500',
-        tags: ['Health', 'Impact']
-    },
+const IMPACT_METRICS = [
+    { id: 'nets', label: 'Malaria Nets', icon: ShieldCheck, cost: 2, color: 'text-rose-500', bg: 'bg-rose-50' },
+    { id: 'meals', label: 'School Meals', icon: Utensils, cost: 0.25, color: 'text-orange-500', bg: 'bg-orange-50' },
+    { id: 'water', label: 'People Water/Year', icon: Droplets, cost: 1.5, color: 'text-blue-500', bg: 'bg-blue-50' }, // Iodine deficiency / clean water
+    { id: 'worms', label: 'Deworming Pills', icon: Pill, cost: 0.5, color: 'text-emerald-500', bg: 'bg-emerald-50' },
 ];
 
-export default function DonationFlow() {
-    const [selectedCharity, setSelectedCharity] = useState('givedirectly');
-
-    // Simulation Data (mirrors MultiplierMatchup defaults for now)
-    const userIncome = 50000;
-    const targetMedian = 240; // Burundi
-    const currentMultiplier = Math.floor(userIncome / targetMedian); // ~208x
-
-    // Gap Closer State
-    const [targetMultiplier, setTargetMultiplier] = useState(currentMultiplier);
-
-    // Calculate Donation needed to reduce the ratio
-    // If I want to be only "100x" richer instead of "208x":
-    // This means I keep (100 * targetMedian). The rest is donated.
-    // Donation = UserIncome - (TargetMultiplier * TargetMedian)
-    const donationAmount = Math.max(0, userIncome - (targetMultiplier * targetMedian));
-
-    const percentageGiven = ((donationAmount / userIncome) * 100).toFixed(1);
-    const impactEquivalent = Math.floor(donationAmount / 2); // Nets approx
+function ImpactCard({ metric, donationAmount, delay }) {
+    const count = Math.floor(donationAmount / metric.cost);
 
     return (
-        <div id="donation-section" className="min-h-screen w-full flex flex-col items-center justify-center bg-zinc-900 text-white font-sans py-20 px-6 relative overflow-hidden">
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: delay, duration: 0.5 }}
+            className={`p-6 rounded-2xl border border-zinc-100 shadow-sm hover:shadow-md transition-shadow bg-white flex flex-col items-center text-center gap-3`}
+        >
+            <div className={`w-12 h-12 rounded-full ${metric.bg} ${metric.color} flex items-center justify-center`}>
+                <metric.icon size={24} strokeWidth={2.5} />
+            </div>
+            <div className="flex flex-col">
+                <span className="text-4xl font-black text-[#121212] tracking-tight tabular-nums">
+                    {count.toLocaleString()}
+                </span>
+                <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{metric.label}</span>
+            </div>
+            <div className="text-[10px] text-zinc-300 font-medium">
+                ${metric.cost.toFixed(2)} / unit
+            </div>
+        </motion.div>
+    );
+}
 
-            {/* Background Ambience allowing for a darker, more serious "Action" mode */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(225,29,72,0.15),transparent_70%)] pointer-events-none" />
-            <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-zinc-700 to-transparent" />
+export default function DonationFlow() {
+    const [daysToDonate, setDaysToDonate] = useState(1);
+    const userIncome = 50000;
+    const dailyIncome = userIncome / 365;
+    const donationAmount = Math.floor(daysToDonate * dailyIncome);
 
-            <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                className="max-w-5xl w-full z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
-            >
+    return (
+        <div id="donation-section" className="min-h-screen w-full flex flex-col items-center justify-center bg-[#FAFAFA] text-[#121212] font-sans py-24 px-6 relative">
 
-                {/* Left Col: The Logic / Gap Closer */}
-                <div className="space-y-12">
+            <div className="max-w-5xl w-full flex flex-col gap-16">
 
-                    <div className="space-y-4">
-                        <div className="inline-flex items-center gap-2 bg-rose-500/10 text-rose-400 border border-rose-500/20 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">
-                            <Scale size={14} />
-                            <span>Equalizer Engine</span>
+                {/* Header */}
+                <div className="text-center space-y-4">
+                    <p className="text-zinc-400 uppercase tracking-widest text-xs font-bold">The Impact Mixer</p>
+                    <h2 className="text-4xl md:text-6xl font-black tracking-tight">
+                        What is your <span className="text-[var(--color-accent)]">1 day</span> worth?
+                    </h2>
+                    <p className="text-xl text-zinc-500 max-w-2xl mx-auto font-light">
+                        To you, it's a Tuesday. To them, it's an entire future.
+                    </p>
+                </div>
+
+                {/* Control Panel */}
+                <div className="bg-white rounded-[2.5rem] shadow-xl border border-zinc-100 p-8 md:p-12">
+
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-12 mb-12">
+                        {/* Input Side */}
+                        <div className="w-full md:w-1/2 space-y-8">
+                            <div className="space-y-4">
+                                <label className="text-sm font-bold text-zinc-900 flex justify-between">
+                                    <span>I want to donate:</span>
+                                    <span className="text-[var(--color-accent)]">{daysToDonate} Days of Income</span>
+                                </label>
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="30"
+                                    value={daysToDonate}
+                                    onChange={(e) => setDaysToDonate(Number(e.target.value))}
+                                    className="w-full h-4 bg-zinc-100 rounded-full appearance-none cursor-pointer accent-[var(--color-accent)] hover:accent-rose-600 transition-all"
+                                />
+                                <div className="flex justify-between text-xs text-zinc-400 font-medium uppercase tracking-wider">
+                                    <span>1 Day</span>
+                                    <span>1 Month</span>
+                                </div>
+                            </div>
+
+                            <div className="bg-zinc-50 rounded-xl p-6 flex justify-between items-center border border-zinc-100">
+                                <span className="text-zinc-500 font-medium">Total Pledge</span>
+                                <span className="text-3xl font-black text-[#121212]">${donationAmount.toLocaleString()}</span>
+                            </div>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">
-                            Choose your <br /><span className="text-rose-500">Unfairness Level</span>.
-                        </h2>
-                        <p className="text-zinc-400 text-lg">
-                            You currently earn <span className="text-white font-bold">{currentMultiplier}x</span> more than a peer in Burundi.
-                            <br />How much of that gap are you willing to close?
-                        </p>
+
+                        {/* CTA Side */}
+                        <div className="w-full md:w-auto">
+                            <button className="bg-[#121212] text-white text-lg font-bold px-10 py-5 rounded-2xl w-full md:w-auto shadow-lg hover:shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
+                                <Heart className="fill-rose-500 text-rose-500" strokeWidth={0} />
+                                <span>Donate ${donationAmount}</span>
+                            </button>
+                            <p className="text-center text-xs text-zinc-300 mt-3">Secure payment via Stripe</p>
+                        </div>
                     </div>
 
-                    {/* The Slider Mechanism */}
-                    <div className="bg-zinc-800/50 rounded-3xl p-8 border border-zinc-700/50 backdrop-blur-sm relative overflow-hidden group">
-                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 via-yellow-500 to-rose-500 opacity-30" />
-
-                        <div className="flex justify-between items-end mb-8">
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Target Multiplier</label>
-                                <div className="text-5xl font-black tabular-nums tracking-tighter">
-                                    {targetMultiplier}x
-                                </div>
-                                <p className="text-xs text-zinc-400">Richer than them</p>
-                            </div>
-
-                            <div className="text-right space-y-1">
-                                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Pledge Amount</label>
-                                <div className="text-4xl font-bold text-rose-400 tabular-nums">
-                                    ${donationAmount.toLocaleString()}
-                                </div>
-                                <p className="text-xs text-rose-400/70">
-                                    {percentageGiven}% of annual income
-                                </p>
-                            </div>
-                        </div>
-
-                        <input
-                            type="range"
-                            min={1}
-                            max={currentMultiplier}
-                            step={1}
-                            value={targetMultiplier}
-                            onChange={(e) => setTargetMultiplier(Number(e.target.value))}
-                            className="w-full h-4 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-rose-500 hover:accent-rose-400 transition-all"
-                        />
-
-                        <div className="flex justify-between mt-4 text-xs font-medium text-zinc-600 uppercase tracking-wider">
-                            <span>1x (Equality)</span>
-                            <span>{currentMultiplier}x (Status Quo)</span>
-                        </div>
-
-                        {/* Visual Bars Closing Gap */}
-                        <div className="mt-10 space-y-3 pt-8 border-t border-zinc-700/50">
-                            <div className="flex items-center gap-4 text-sm text-zinc-400">
-                                <div className="w-24 text-right">You (After)</div>
-                                <div className="flex-1 h-3 bg-zinc-700 rounded-full overflow-hidden">
-                                    <motion.div
-                                        animate={{ width: `${(targetMultiplier / currentMultiplier) * 100}%` }}
-                                        className="h-full bg-white"
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-zinc-400">
-                                <div className="w-24 text-right">Them</div>
-                                <div className="flex-1 h-3 bg-zinc-700 rounded-full overflow-hidden">
-                                    <div className="h-full w-[1px] bg-rose-500" /> {/* Just a sliver */}
-                                </div>
-                            </div>
-                        </div>
-
+                    {/* Impact Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {IMPACT_METRICS.map((m, i) => (
+                            <ImpactCard key={m.id} metric={m} donationAmount={donationAmount} delay={i * 0.1} />
+                        ))}
                     </div>
 
                 </div>
 
-                {/* Right Col: The Action / Impact */}
-                <div className="bg-white text-zinc-900 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden flex flex-col justify-between h-full min-h-[500px]">
-
-                    <div className="space-y-8 relative z-10">
-                        <div>
-                            <h3 className="text-2xl font-bold mb-2">Immediate Impact</h3>
-                            <p className="text-zinc-500">Your choice doesn't just reduce a number. It buys survival.</p>
-                        </div>
-
-                        {/* Impact Stat */}
-                        <div className="flex items-center gap-6">
-                            <div className="bg-rose-100 p-4 rounded-2xl text-rose-600">
-                                <ShieldCheck size={32} />
-                            </div>
-                            <div>
-                                <div className="text-5xl font-black text-rose-600 tracking-tighter">
-                                    {impactEquivalent.toLocaleString()}
-                                </div>
-                                <div className="font-bold text-zinc-900 uppercase tracking-wide">Malaria Nets</div>
-                            </div>
-                        </div>
-
-                        {/* Charity Selector Mini */}
-                        <div className="space-y-3">
-                            <label className="text-xs font-bold uppercase tracking-widest text-zinc-400">Recipient Fund</label>
-                            <div className="grid grid-cols-2 gap-3">
-                                {CHARITIES.map(c => (
-                                    <button
-                                        key={c.id}
-                                        onClick={() => setSelectedCharity(c.id)}
-                                        className={`
-                                    p-4 rounded-xl border-2 text-left transition-all
-                                    ${selectedCharity === c.id ? 'border-rose-500 bg-rose-50' : 'border-zinc-100 hover:border-zinc-200'}
-                                `}
-                                    >
-                                        <div className="font-bold text-sm">{c.name}</div>
-                                        <div className="text-[10px] text-zinc-500 font-medium uppercase mt-1">{c.tags[0]}</div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    <button className="bg-[#121212] hover:scale-[1.02] active:scale-[0.98] text-white w-full py-5 rounded-xl font-bold text-lg mt-8 flex items-center justify-center gap-3 transition-all shadow-xl group">
-                        <span>Finalize Impact</span>
-                        <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                    </button>
-
-                    {/* Decor */}
-                    <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
-
-                </div>
-
-            </motion.div>
+            </div>
         </div>
     );
 }

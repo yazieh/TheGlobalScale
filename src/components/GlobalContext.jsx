@@ -47,7 +47,6 @@ export default function GlobalContext() {
                 className="relative w-full max-w-4xl h-[400px] flex items-end justify-center mb-12"
             >
                 {/* The Curve Container */}
-                {/* The Curve Container */}
                 <div
                     className="relative w-full h-full"
                     onMouseMove={(e) => {
@@ -64,17 +63,23 @@ export default function GlobalContext() {
                                 <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.1" />
                                 <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
                             </linearGradient>
-                            {/* Regions Patterns/Gradients */}
                             <linearGradient id="povertyGradient" x1="0" x2="1" y1="0" y2="0">
                                 <stop offset="0%" stopColor="#ef4444" stopOpacity="0.1" />
                                 <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
                             </linearGradient>
                         </defs>
 
-                        {/* Regions Backgrounds */}
-                        {/* Poverty Trap (Bottom 20%) */}
-                        <rect x="0" y="0" width={graphWidth * 0.2} height={graphHeight} fill="url(#povertyGradient)" opacity="0.3" />
-                        <text x="10" y={graphHeight - 10} className="text-[10px] fill-zinc-400 font-mono tracking-widest uppercase">The Struggle</text>
+                        {/* Regions: Poverty Trap (Bottom 10%) */}
+                        <rect x="0" y="0" width={graphWidth * 0.1} height={graphHeight} fill="url(#povertyGradient)" opacity="0.3" />
+
+                        {/* Income Landmarks (Vertical Dashed Lines) */}
+                        {/* $2.15/day - Approx 10th percentile */}
+                        <line x1={graphWidth * 0.1} y1={0} x2={graphWidth * 0.1} y2={graphHeight} stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2" opacity="0.4" />
+                        <text x={graphWidth * 0.1 + 5} y={graphHeight - 5} className="text-[9px] fill-zinc-400 font-mono uppercase tracking-wider">Extreme Poverty</text>
+
+                        {/* Global Median - 50th percentile */}
+                        <line x1={graphWidth * 0.5} y1={0} x2={graphWidth * 0.5} y2={graphHeight} stroke="#121212" strokeWidth="1" strokeDasharray="2 2" opacity="0.2" />
+                        <text x={graphWidth * 0.5 + 5} y={graphHeight - 5} className="text-[9px] fill-zinc-400 font-mono uppercase tracking-wider">Global Middle</text>
 
                         {/* The Curve Area */}
                         <motion.path
@@ -101,7 +106,7 @@ export default function GlobalContext() {
                             />
                         )}
 
-                        {/* User Marker Line */}
+                        {/* User Marker */}
                         <motion.line
                             x1={userX}
                             y1={graphHeight}
@@ -115,7 +120,6 @@ export default function GlobalContext() {
                             transition={{ delay: 2, duration: 0.5 }}
                         />
 
-                        {/* User Marker Dot */}
                         <motion.circle
                             cx={userX}
                             cy={userY}
@@ -125,25 +129,25 @@ export default function GlobalContext() {
                             animate={{ scale: 1 }}
                             transition={{ delay: 2.5 }}
                         />
-                        <motion.circle
-                            cx={userX}
-                            cy={userY}
-                            r="12"
-                            fill="var(--color-accent)"
-                            opacity="0.3"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ delay: 2.5, repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
-                        />
                     </svg>
 
-                    {/* Dynamic Hover Tooltip */}
+                    {/* Rich Tooltips */}
                     {hoveredData && (
                         <div
-                            className="absolute top-0 transform -translate-x-1/2 pointer-events-none bg-black text-white text-xs px-2 py-1 rounded"
+                            className="absolute top-10 transform -translate-x-1/2 pointer-events-none bg-white/90 backdrop-blur border border-zinc-200 shadow-xl p-3 rounded-xl z-50 min-w-[140px]"
                             style={{ left: `${hoveredData}%` }}
                         >
-                            {Math.floor(hoveredData)}th Percentile
+                            <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider mb-1">
+                                {Math.floor(hoveredData)}th Percentile
+                            </div>
+                            <div className="text-sm font-bold text-[#121212] mb-1">
+                                <span className="text-[var(--color-accent)]">
+                                    ~${(Math.pow(1.05, hoveredData) * 300).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                </span> / year
+                            </div>
+                            <div className="text-[10px] text-zinc-500">
+                                Pop: ~{(80000000).toLocaleString()} ppl
+                            </div>
                         </div>
                     )}
 
@@ -155,18 +159,8 @@ export default function GlobalContext() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 2.6 }}
                     >
-                        <span className="font-bold text-[var(--color-accent)]">You are here</span>
-                        <br />Top 6% Globally
+                        <span className="font-bold text-[var(--color-accent)]">You</span>
                     </motion.div>
-
-                    {/* Annotation for Median */}
-                    <div
-                        className="absolute transform -translate-x-1/2 bottom-0 flex flex-col items-center group cursor-pointer"
-                        style={{ left: '50%' }}
-                    >
-                        <div className="w-[1px] h-32 bg-zinc-300 group-hover:bg-zinc-800 transition-colors"></div>
-                        <div className="mt-2 text-xs font-mono text-zinc-400 group-hover:text-black bg-zinc-100 px-2 py-1 rounded">Global Median</div>
-                    </div>
                 </div>
             </motion.div>
 
