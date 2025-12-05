@@ -22,11 +22,16 @@ export default function MultiplierMatchup() {
             {/* Background Ambience */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[var(--color-accent)] opacity-5 blur-[120px] rounded-full pointer-events-none" />
 
+            {/* Header / Nav Anchor */}
+            <div className="absolute top-10 left-0 w-full flex justify-center opacity-30">
+                <ChevronDown className="animate-bounce" />
+            </div>
+
             <motion.div
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 transition={{ duration: 1 }}
-                className="w-full max-w-6xl px-6 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 relative z-10"
+                className="w-full max-w-6xl px-6 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 relative z-10 items-center"
             >
 
                 {/* LEFT: THE USER (YOU) */}
