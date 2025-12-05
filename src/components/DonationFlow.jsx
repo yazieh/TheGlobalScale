@@ -80,7 +80,7 @@ export default function DonationFlow() {
                                     </div>
                                 </label>
 
-                                {/* Reversed Slider: Left (high ratio/cheap) -> Right (low ratio/expensive) */}
+                                {/* Standard LTR: Min (20) -> Max (208) */}
                                 <input
                                     type="range"
                                     min="20"
@@ -88,21 +88,20 @@ export default function DonationFlow() {
                                     step="1"
                                     value={targetRatio}
                                     onChange={(e) => setTargetRatio(Number(e.target.value))}
-                                    className="w-full h-4 bg-zinc-100 rounded-full appearance-none cursor-pointer accent-[var(--color-accent)] hover:accent-rose-600 transition-all dir-rtl"
-                                    style={{ direction: 'rtl' }}
+                                    className="w-full h-4 bg-zinc-100 rounded-full appearance-none cursor-pointer accent-[var(--color-accent)] hover:accent-rose-600 transition-all"
                                 />
                                 <div className="flex justify-between text-xs text-zinc-400 font-medium uppercase tracking-wider">
-                                    <span>20x (Radical)</span>
+                                    <span className="text-[var(--color-accent)]">20x (Radical)</span>
                                     <span>{startingRatio}x (Status Quo)</span>
                                 </div>
                             </div>
 
-                            <div className="bg-zinc-50 rounded-xl p-6 flex justify-between items-center border border-zinc-100">
+                            <div className="bg-zinc-50 rounded-xl p-6 flex justify-between items-center border border-zinc-100 shadow-inner">
                                 <div className="flex flex-col">
-                                    <span className="text-zinc-500 font-medium text-xs uppercase tracking-wider">Required Contribution</span>
-                                    <span className="text-zinc-300 text-[10px]">To achieve this ratio</span>
+                                    <span className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Required Transfer</span>
+                                    <span className="text-zinc-400 text-[10px]">To bridge the gap</span>
                                 </div>
-                                <span className="text-3xl font-black text-[#121212]">${donationAmount.toLocaleString()}</span>
+                                <span className="text-4xl font-black text-[#121212] tracking-tight">${donationAmount.toLocaleString()}</span>
                             </div>
                         </div>
 
