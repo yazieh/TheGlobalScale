@@ -47,14 +47,34 @@ export default function GlobalContext() {
                 className="relative w-full max-w-4xl h-[400px] flex items-end justify-center mb-12"
             >
                 {/* The Curve Container */}
-                <div className="relative w-full h-full overflow-visible">
-                    <svg viewBox={`0 0 ${graphWidth} ${graphHeight}`} className="w-full h-full overflow-visible drop-shadow-xl ">
+                {/* The Curve Container */}
+                <div
+                    className="relative w-full h-full"
+                    onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const p = Math.min(100, Math.max(0, (x / rect.width) * 100));
+                        setHoveredData(p);
+                    }}
+                    onMouseLeave={() => setHoveredData(null)}
+                >
+                    <svg viewBox={`0 0 ${graphWidth} ${graphHeight}`} className="w-full h-full overflow-visible drop-shadow-xl">
                         <defs>
                             <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
                                 <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.1" />
                                 <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
                             </linearGradient>
+                            {/* Regions Patterns/Gradients */}
+                            <linearGradient id="povertyGradient" x1="0" x2="1" y1="0" y2="0">
+                                <stop offset="0%" stopColor="#ef4444" stopOpacity="0.1" />
+                                <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
+                            </linearGradient>
                         </defs>
+
+                        {/* Regions Backgrounds */}
+                        {/* Poverty Trap (Bottom 20%) */}
+                        <rect x="0" y="0" width={graphWidth * 0.2} height={graphHeight} fill="url(#povertyGradient)" opacity="0.3" />
+                        <text x="10" y={graphHeight - 10} className="text-[10px] fill-zinc-400 font-mono tracking-widest uppercase">The Struggle</text>
 
                         {/* The Curve Area */}
                         <motion.path
@@ -66,6 +86,20 @@ export default function GlobalContext() {
                             animate={{ pathLength: 1, opacity: 1 }}
                             transition={{ duration: 2, ease: "easeInOut" }}
                         />
+
+                        {/* Hover Scanner Line */}
+                        {hoveredData && (
+                            <line
+                                x1={(hoveredData / 100) * graphWidth}
+                                y1="0"
+                                x2={(hoveredData / 100) * graphWidth}
+                                y2={graphHeight}
+                                stroke="#121212"
+                                strokeWidth="1"
+                                strokeDasharray="2 2"
+                                opacity="0.5"
+                            />
+                        )}
 
                         {/* User Marker Line */}
                         <motion.line
@@ -102,6 +136,16 @@ export default function GlobalContext() {
                             transition={{ delay: 2.5, repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
                         />
                     </svg>
+
+                    {/* Dynamic Hover Tooltip */}
+                    {hoveredData && (
+                        <div
+                            className="absolute top-0 transform -translate-x-1/2 pointer-events-none bg-black text-white text-xs px-2 py-1 rounded"
+                            style={{ left: `${hoveredData}%` }}
+                        >
+                            {Math.floor(hoveredData)}th Percentile
+                        </div>
+                    )}
 
                     {/* Annotation for User */}
                     <motion.div
