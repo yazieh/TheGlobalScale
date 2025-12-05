@@ -1,11 +1,11 @@
 import GlobalContext from './components/GlobalContext';
-import PerspectiveBridge from './components/PerspectiveBridge';
+import MultiplierMatchup from './components/MultiplierMatchup';
 
 function App() {
   return (
     <div className="bg-[#FAFAFA] text-[#121212] min-h-screen">
       <GlobalContext />
-      <PerspectiveBridge />
+      <MultiplierMatchup />
     </div>
   );
 }

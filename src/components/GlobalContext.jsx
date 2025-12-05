@@ -134,7 +134,7 @@ export default function GlobalContext() {
                 className="flex gap-4"
             >
                 <button
-                    onClick={() => document.getElementById('bridge-section')?.scrollIntoView({ behavior: 'smooth' })}
+                    onClick={() => document.getElementById('matchup-section')?.scrollIntoView({ behavior: 'smooth' })}
                     className="bg-[var(--color-accent)] text-white px-8 py-3 rounded-full font-medium shadow-lg hover:shadow-xl hover:scale-105 transition-all"
                 >
                     See My True Impact
@@ -144,6 +144,6 @@ export default function GlobalContext() {
                 </button>
             </motion.div>
 
-        </div>
+        </div >
     );
 }
